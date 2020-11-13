@@ -80,7 +80,7 @@ std::shared_ptr<FutureMessage> RequestCallbackNoPython::processMessage(
           if (serverProcessGlobalProfilerStateStackEntryPtr) {
             // Initialize thread-local profiler state from process-global
             // profiler state.
-            ::torch::autograd::profiler::enableProfiler(
+            ::torch::autograd::profiler::enableProfilerLegacy(
                 serverProcessGlobalProfilerStateStackEntryPtr->statePtr()
                     ->config());
           }
@@ -92,7 +92,7 @@ std::shared_ptr<FutureMessage> RequestCallbackNoPython::processMessage(
           if (serverProcessGlobalProfilerStateStackEntryPtr) {
             // Restore thread-local profiler state.
             ::torch::autograd::profiler::thread_event_lists event_lists =
-                ::torch::autograd::profiler::disableProfiler();
+                ::torch::autograd::profiler::disableProfilerLegacy();
             // Put thread_local event_lists into the process-global profiler
             // state.
             profiler::processglobal::pushResultRecursive(
@@ -536,7 +536,7 @@ void RequestCallbackNoPython::processRpc(
                                              responseFuture,
                                              profilingKeyId,
                                              profilingConfig] {
-              std::vector<torch::autograd::profiler::Event> profiledEvents;
+              std::vector<torch::autograd::profiler::LegacyEvent> profiledEvents;
               // Defer consolidation of profiler events until async work has
               // completed (such as async UDF)
 
@@ -550,7 +550,7 @@ void RequestCallbackNoPython::processRpc(
               torch::autograd::profiler::ProfilerDisableOptions opts(
                   false, true);
               auto event_lists =
-                  torch::autograd::profiler::disableProfiler(opts);
+                  torch::autograd::profiler::disableProfilerLegacy(opts);
               if (wrappedRpcResponseFuture->hasError()) {
                 // Propagate error
                 // No need to propagate remote events in the case of an error.

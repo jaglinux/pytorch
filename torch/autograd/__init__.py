@@ -251,6 +251,10 @@ if not torch._C._autograd_init():
     raise RuntimeError("autograd initialization failed")
 
 # Import all native method/classes
-from torch._C._autograd import (ProfilerState, ProfilerConfig, ProfilerEvent,
-                                _enable_profiler, _disable_profiler, _profiler_enabled,
-                                _enable_record_function, _set_empty_test_observer)
+from torch._C._autograd import (ProfilerActivity, ProfilerState, ProfilerConfig, ProfilerEvent,
+                                _enable_profiler_legacy, _disable_profiler_legacy, _profiler_enabled,
+                                _enable_record_function, _set_empty_test_observer, kineto_available)
+
+if kineto_available():
+    from torch._C._autograd import (ProfilerResult, KinetoEvent,
+                                    _prepare_profiler, _enable_profiler, _disable_profiler)
