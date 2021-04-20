@@ -207,7 +207,7 @@ class TestZeroRedundancyOptimizerSingleRank(TestZeroRedundancyOptimizer):
 class TestZeroRedundancyOptimizerDistributed(TestZeroRedundancyOptimizer):
     @property
     def world_size(self):
-        return min(4, max(2, torch.cuda.device_count()))
+        return max(2, torch.cuda.device_count())
 
     @common_distributed.skip_if_rocm
     def test_step(self):
@@ -293,7 +293,7 @@ class TestZeroRedundancyOptimizerDistributed(TestZeroRedundancyOptimizer):
         self.dist_init(self.rank)
         sizes = [9, 7, 5, 3]
         params = []
-        for size in sizes * self.world_size:
+        for size in sorted(sizes * self.world_size, reverse=True):
             params.append(torch.rand(size, 1))
         o = ZeroRedundancyOptimizer(params, optimizer_class=SGD, lr=0.1)
         self.assertEqual(sum([x.numel() for x in o.optim.param_groups[0]["params"]]), sum(sizes))
@@ -309,7 +309,7 @@ class TestZeroRedundancyOptimizerDistributed(TestZeroRedundancyOptimizer):
             params = []
             sizes = [9, 7, 5, 3]
             sizes_world = sizes * self.world_size
-            for size in sizes_world[:-1]:
+            for size in sorted(sizes_world[:-1], reverse=True):
                 params.append(torch.rand(size, 1))
 
             # Make sure that the params are trainable, enforces size-based partitioning
